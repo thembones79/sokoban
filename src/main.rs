@@ -2,13 +2,15 @@
 // main.rs
 
 use ggez::{
-    conf, event,
+    conf,
+    event::{self, KeyCode, KeyMods},
     graphics::{self, DrawParam, Image},
     Context, GameResult,
 };
 use glam::Vec2;
 use specs::{
     join::Join, Builder, Component, ReadStorage, RunNow, System, VecStorage, World, WorldExt,
+    Write, WriteStorage,
 };
 
 use std::path;
@@ -45,6 +47,11 @@ pub struct Box {}
 #[derive(Component)]
 #[storage(VecStorage)]
 pub struct BoxSpot {}
+
+#[derive(Default)]
+pub struct InputQueue {
+    pub keys_pressed: Vec<KeyCode>,
+}
 
 // Systems
 pub struct RenderingSystem<'a> {
@@ -98,6 +105,18 @@ struct Game {
 // - updating
 // - rendering
 impl event::EventHandler<ggez::GameError> for Game {
+    fn key_down_event(
+        &mut self,
+        _context: &mut Context,
+        keycode: KeyCode,
+        _keymod: KeyMods,
+        _repeat: bool,
+    ) {
+        println!("Key pressed: {:?}", keycode);
+
+        let mut input_queue = self.world.write_resource::<InputQueue>();
+        input_queue.keys_pressed.push(keycode);
+    }
     fn update(&mut self, _context: &mut Context) -> GameResult {
         Ok(())
     }
@@ -231,9 +250,15 @@ pub fn load_map(world: &mut World, map_string: String) {
         }
     }
 }
+
+pub fn register_resources(world: &mut World) {
+    world.insert(InputQueue::default())
+}
+
 pub fn main() -> GameResult {
     let mut world = World::new();
     register_components(&mut world);
+    register_resources(&mut world);
     initialize_level(&mut world);
 
     // Create a game context and event loop
