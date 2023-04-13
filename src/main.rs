@@ -58,6 +58,8 @@ pub struct RenderingSystem<'a> {
     context: &'a mut Context,
 }
 
+pub struct InputSystem {}
+
 // System implementation
 impl<'a> System<'a> for RenderingSystem<'a> {
     // Data
@@ -93,6 +95,30 @@ impl<'a> System<'a> for RenderingSystem<'a> {
     }
 }
 
+impl<'a> System<'a> for InputSystem {
+    type SystemData = (
+        Write<'a, InputQueue>,
+        WriteStorage<'a, Position>,
+        ReadStorage<'a, Player>,
+    );
+
+    fn run(&mut self, data: Self::SystemData) {
+        let (mut input_queue, mut positions, players) = data;
+
+        for (position, _player) in (&mut positions, &players).join() {
+            if let Some(key) = input_queue.keys_pressed.pop() {
+                match key {
+                    KeyCode::Up => position.y -= 1,
+                    KeyCode::Down => position.y += 1,
+                    KeyCode::Left => position.x -= 1,
+                    KeyCode::Right => position.x += 1,
+                    _ => (),
+                }
+            }
+        }
+    }
+}
+
 // This struct will hold all our game state
 // For now there is nothing to be held, but we'll add
 // things shortly.
@@ -118,6 +144,10 @@ impl event::EventHandler<ggez::GameError> for Game {
         input_queue.keys_pressed.push(keycode);
     }
     fn update(&mut self, _context: &mut Context) -> GameResult {
+        {
+            let mut is = InputSystem {};
+            is.run_now(&self.world);
+        }
         Ok(())
     }
 
