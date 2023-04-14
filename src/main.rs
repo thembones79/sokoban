@@ -1,4 +1,4 @@
-e/ Rust sokoban
+// Rust sokoban
 // main.rs
 
 use ggez::{
@@ -9,13 +9,16 @@ use ggez::{
 };
 use glam::Vec2;
 use specs::{
-    join::Join, Builder, Component, ReadStorage, RunNow, System, VecStorage, World, WorldExt,
-    Write, WriteStorage,
+    join::Join, world::Index, Builder, Component, Entities, NullStorage, ReadStorage, RunNow,
+    System, VecStorage, World, WorldExt, Write, WriteStorage,
 };
 
+use std::collections::HashMap;
 use std::path;
 
 const TILE_WIDTH: f32 = 32.0;
+const MAP_WIDTH: u8 = 8;
+const MAP_HEIGHT: u8 = 9;
 
 // Components
 #[derive(Debug, Component, Clone, Copy)]
@@ -106,15 +109,56 @@ impl<'a> System<'a> for RenderingSystem<'a> {
 impl<'a> System<'a> for InputSystem {
     type SystemData = (
         Write<'a, InputQueue>,
+        Entities<'a>,
         WriteStorage<'a, Position>,
         ReadStorage<'a, Player>,
+        ReadStorage<'a, Moveable>,
+        ReadStorage<'a, Immovable>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (mut input_queue, mut positions, players) = data;
+        let (mut input_queue, entities, mut positions, players, movables, immovables) = data;
+
+        let mut to_move = Vec::new();
 
         for (position, _player) in (&mut positions, &players).join() {
             if let Some(key) = input_queue.keys_pressed.pop() {
+                let mov: HashMap<(u8, u8), Index> = (&entities, &moveables, &positions)
+                    .join()
+                    .map(|t| ((t.2.x, t.2.y), t.0.id()))
+                    .collect::<HashMap<_, _>>();
+
+                let immov: HashMap<(u8, u8), Index> = (&entities, &moveables, &positions)
+                    .join()
+                    .map(|t| ((t.2.x, t.2.y), t.0.id()))
+                    .collect::<HashMap<_, _>>();
+
+                let (start, end, is_x) = match key {
+                    KeyCode::Up => (position.y, 0, false),
+                    KeyCode::Down => (position.y, MAP_HEIGHT, false),
+                    KeyCode::Left => (position.x, 0, true),
+                    KeyCode::Right => (position.x, MAP_WIDTH, true),
+                    _ => continue,
+                };
+
+                let range = if start < end {
+                    (start..=end).collect::<Vec<_>>()
+                } else {
+                    (end..=start).rev().collect::<Vec<_>>()
+                };
+
+                for x_or_y in range {
+                    let pos = if is_x {
+                        (x_or_y, position.y)
+                    } else {
+                        (position.x, x_or_y)
+                    };
+
+                    match mov.get(&pos) {
+                        Some(id) => to_move.push,
+                    }
+                }
+
                 match key {
                     KeyCode::Up => position.y -= 1,
                     KeyCode::Down => position.y += 1,
@@ -191,6 +235,7 @@ pub fn create_wall(world: &mut World, position: Position) {
             path: "/images/wall.png".to_string(),
         })
         .with(Wall {})
+        .with(Immovable)
         .build();
 }
 
@@ -212,6 +257,7 @@ pub fn create_box(world: &mut World, position: Position) {
             path: "/images/box.png".to_string(),
         })
         .with(Box {})
+        .with(Movable)
         .build();
 }
 
@@ -234,6 +280,7 @@ pub fn create_player(world: &mut World, position: Position) {
             path: "/images/player.png".to_string(),
         })
         .with(Player {})
+        .with(Movable)
         .build();
 }
 
