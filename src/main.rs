@@ -1,4 +1,4 @@
-// Rust sokoban
+e/ Rust sokoban
 // main.rs
 
 use ggez::{
@@ -47,6 +47,14 @@ pub struct Box {}
 #[derive(Component)]
 #[storage(VecStorage)]
 pub struct BoxSpot {}
+
+#[derive(Component, Default)]
+#[storage(NullStorage)]
+pub struct Movable;
+
+#[derive(Component, Default)]
+#[storage(NullStorage)]
+pub struct Immovable;
 
 #[derive(Default)]
 pub struct InputQueue {
@@ -170,6 +178,8 @@ pub fn register_components(world: &mut World) {
     world.register::<Wall>();
     world.register::<Box>();
     world.register::<BoxSpot>();
+    world.register::<Movable>();
+    world.register::<Imovable>();
 }
 
 // Create a wall entity
