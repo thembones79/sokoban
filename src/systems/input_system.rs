@@ -1,6 +1,6 @@
 use crate::components::*;
 use crate::constants::*;
-use crate::resources::{GamePlay, InputQueue};
+use crate::resources::{Gameplay, InputQueue};
 use ggez::event::KeyCode;
 use specs::{world::Index, Entities, Join, ReadStorage, System, Write, WriteStorage};
 
