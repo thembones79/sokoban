@@ -25,7 +25,7 @@ impl<'a> System<'a> for GameplayStateSystem {
             .collect::<HashMap<_, _>>();
 
         for (_box_spot, position) in (&box_spots, &positions).join() {
-            if boxes_by_position.containd_key(&(position.x, position.y)) {
+            if boxes_by_position.contains_key(&(position.x, position.y)) {
             } else {
                 gameplay_state.state = GameplayState::Playing;
                 return;

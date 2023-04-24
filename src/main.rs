@@ -34,6 +34,13 @@ impl event::EventHandler<ggez::GameError> for Game {
             is.run_now(&self.world);
         }
 
+        // Run gameplay state system
+
+        {
+            let mut gss = GameplayStateSystem {};
+            gss.run_now(&self.world);
+        }
+
         Ok(())
     }
 
