@@ -20,7 +20,13 @@ impl RenderingSystem<'_> {
         let dimensions = Vec2::new(0.0, 20.0);
 
         graphics::queue_text(self.context, &text, dimensions, color);
-        graphic::draw_queued_text();
+        graphics::draw_queued_text(
+            self.context,
+            graphics::DrawParam::new().dest(destination),
+            None,
+            graphics::FilterMode::Linear,
+        )
+        .expect("expected drawing queued text");
     }
 }
 // System implementation
