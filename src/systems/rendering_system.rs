@@ -2,7 +2,7 @@ use crate::components::*;
 use crate::constants::TILE_WIDTH;
 
 use ggez::{
-    graphics::{self, DrawParam, Image},
+    graphics::{self, Color, DrawParam, Image},
     Context,
 };
 use glam::Vec2;
@@ -12,6 +12,17 @@ pub struct RenderingSystem<'a> {
     pub context: &'a mut Context,
 }
 
+impl RenderingSystem<'_> {
+    pub fn draw_text(&mut self, text_string: &str, x: f32, y: f32) {
+        let text = graphics::Text::new(text_string);
+        let destination = Vec2::new(x, y);
+        let color = Some(Color::new(0.0, 0.0, 0.0, 1.0));
+        let dimensions = Vec2::new(0.0, 20.0);
+
+        graphics::queue_text(self.context, &text, dimensions, color);
+        graphic::draw_queued_text();
+    }
+}
 // System implementation
 impl<'a> System<'a> for RenderingSystem<'a> {
     // Data

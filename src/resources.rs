@@ -1,6 +1,7 @@
 // resources.rs
 use ggez::event::KeyCode;
 use specs::World;
+use std::fmt::{self, Display};
 
 // Resources
 #[derive(Default)]
@@ -22,6 +23,16 @@ pub enum GameplayState {
 impl Default for GameplayState {
     fn default() -> Self {
         Self::Playing
+    }
+}
+
+impl Display for GameplayState {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.write_str(match self {
+            GameplayState::Playing => "Playing",
+            GameplayState::Won => "Won",
+        })?;
+        Ok(())
     }
 }
 
