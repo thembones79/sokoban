@@ -1,12 +1,13 @@
 use crate::components::*;
 use crate::constants::TILE_WIDTH;
+use crate::Gameplay;
 
 use ggez::{
     graphics::{self, Color, DrawParam, Image},
     Context,
 };
 use glam::Vec2;
-use specs::{Join, ReadStorage, System};
+use specs::{Join, Read, ReadStorage, System};
 
 pub struct RenderingSystem<'a> {
     pub context: &'a mut Context,
@@ -32,10 +33,14 @@ impl RenderingSystem<'_> {
 // System implementation
 impl<'a> System<'a> for RenderingSystem<'a> {
     // Data
-    type SystemData = (ReadStorage<'a, Position>, ReadStorage<'a, Renderable>);
+    type SystemData = (
+        Read<'a, Gameplay>,
+        ReadStorage<'a, Position>,
+        ReadStorage<'a, Renderable>,
+    );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (positions, renderables) = data;
+        let (gameplay, positions, renderables) = data;
 
         // Clearing the screen (this gives us the backround colour)
         graphics::clear(self.context, graphics::Color::new(0.95, 0.95, 0.95, 1.0));
@@ -57,6 +62,10 @@ impl<'a> System<'a> for RenderingSystem<'a> {
             let draw_params = DrawParam::new().dest(Vec2::new(x, y));
             graphics::draw(self.context, &image, draw_params).expect("expected render");
         }
+
+        // Render any text
+        self.draw_text(&gameplay.state.to_string(), 525.0, 80.0);
+        self.draw_text(&gameplay.moves_count.to_string(), 525.0, 100.0);
 
         // Finally, present the context, this will actually display everything
         // on the screen.
