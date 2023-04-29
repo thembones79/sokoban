@@ -67,7 +67,7 @@ impl<'a> System<'a> for InputSystem {
                     // if it exists, we try to move it and continue
                     // if it doesn't exist, we continue and try to find an immovable instead
                     match mov.get(&pos) {
-                        Some(id) => to_move.push((key, id.clone())),
+                        Some(id) => to_move.push((key, *id)),
                         None => {
                             // find an immovable
                             // if it exists, we need to stop and not move anything
@@ -82,7 +82,7 @@ impl<'a> System<'a> for InputSystem {
             }
         }
 
-        if to_move.len() > 0 {
+        if !to_move.is_empty() {
             gameplay.moves_count += 1;
         }
 
