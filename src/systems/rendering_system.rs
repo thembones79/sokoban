@@ -1,5 +1,8 @@
+use std::time::Duration;
+
 use crate::components::*;
 use crate::constants::TILE_WIDTH;
+use crate::resources::*;
 use crate::Gameplay;
 
 use ggez::{
@@ -29,18 +32,30 @@ impl RenderingSystem<'_> {
         )
         .expect("expected drawing queued text");
     }
+
+    pub fn get_image(&mut self, renderable: &Renderable, delta: Duration) -> Image {
+        let path_index = match renderable.kind() {
+            RenderableKind::Static => 0,
+            RenderableKind::Animated => ((delta.as_millis() % 1000) / 250) as usize,
+        };
+
+        let image_path = renderable.path(path_index);
+
+        Image::new(self.context, image_path).expect("expected image")
+    }
 }
 // System implementation
 impl<'a> System<'a> for RenderingSystem<'a> {
     // Data
     type SystemData = (
         Read<'a, Gameplay>,
+        Read<'a, Time>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, Renderable>,
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        let (gameplay, positions, renderables) = data;
+        let (gameplay, time, positions, renderables) = data;
 
         // Clearing the screen (this gives us the backround colour)
         graphics::clear(self.context, graphics::Color::new(0.95, 0.95, 0.95, 1.0));
@@ -54,7 +69,7 @@ impl<'a> System<'a> for RenderingSystem<'a> {
         // and draw it at the specified position.
         for (position, renderable) in rendering_data.iter() {
             // Load the image
-            let image = Image::new(self.context, renderable.path.clone()).expect("expected image");
+            let image = self.get_image(renderable, time.delta);
             let x = position.x as f32 * TILE_WIDTH;
             let y = position.y as f32 * TILE_WIDTH;
 
