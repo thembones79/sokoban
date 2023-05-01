@@ -13,6 +13,7 @@ use std::path;
 mod components;
 mod constants;
 mod entities;
+mod events;
 mod map;
 mod resources;
 mod systems;
