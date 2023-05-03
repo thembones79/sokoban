@@ -1,17 +1,6 @@
-// components.rs
 use specs::{Component, NullStorage, VecStorage, World, WorldExt};
+
 use std::fmt::{self, Display};
-
-#[derive(PartialEq)]
-pub enum BoxColour {
-    Red,
-    Blue,
-}
-
-pub enum RenderableKind {
-    Static,
-    Animated,
-}
 
 // Components
 #[derive(Debug, Component, Clone, Copy)]
@@ -20,6 +9,11 @@ pub struct Position {
     pub x: u8,
     pub y: u8,
     pub z: u8,
+}
+
+pub enum RenderableKind {
+    Static,
+    Animated,
 }
 
 #[derive(Component)]
@@ -46,6 +40,9 @@ impl Renderable {
     }
 
     pub fn path(&self, path_index: usize) -> String {
+        // If we get asked for a path that is larger than the
+        // number of paths we actually have, we simply mod the index
+        // with the length to get an index that is in range.
         self.paths[path_index % self.paths.len()].clone()
     }
 }
@@ -57,6 +54,22 @@ pub struct Wall {}
 #[derive(Component)]
 #[storage(VecStorage)]
 pub struct Player {}
+
+#[derive(PartialEq)]
+pub enum BoxColour {
+    Red,
+    Blue,
+}
+
+impl Display for BoxColour {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        fmt.write_str(match self {
+            BoxColour::Red => "red",
+            BoxColour::Blue => "blue",
+        })?;
+        Ok(())
+    }
+}
 
 #[derive(Component)]
 #[storage(VecStorage)]
@@ -77,16 +90,6 @@ pub struct Movable;
 #[derive(Component, Default)]
 #[storage(NullStorage)]
 pub struct Immovable;
-
-impl Display for BoxColour {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt.write_str(match self {
-            BoxColour::Red => "red",
-            BoxColour::Blue => "blue",
-        })?;
-        Ok(())
-    }
-}
 
 pub fn register_components(world: &mut World) {
     world.register::<Position>();

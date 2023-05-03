@@ -1,4 +1,3 @@
-// map.rs
 use crate::components::{BoxColour, Position};
 use crate::entities::*;
 use specs::World;

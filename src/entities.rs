@@ -1,4 +1,3 @@
-// entities.rs
 use crate::components::*;
 use specs::{Builder, World, WorldExt};
 
